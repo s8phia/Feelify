@@ -16,8 +16,12 @@ export class MoodSelectorComponent {
   selectMood(mood: string) {
     console.log('Selected mood:', mood);
     this.selectedMood = mood;
-    this.songService.getSongsByMood(mood).subscribe((data) => {
-      this.songs = data;
+    this.songService.getSongsByMood(mood).subscribe({
+      next: (data) => {
+        console.log('Received songs:', data);
+        this.songs = data;
+      },
+    
     });
   }
 }
