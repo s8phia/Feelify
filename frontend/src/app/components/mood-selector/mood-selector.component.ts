@@ -1,6 +1,5 @@
 import { Component, Inject } from '@angular/core';
-import { SongService } from '../../song.service'; // Adjusted the path to the correct relative location
-
+import { SongService } from '../../song.service'; 
 @Component({
   selector: 'app-mood-selector',
   imports: [],
@@ -15,6 +14,7 @@ export class MoodSelectorComponent {
   constructor(private songService: SongService) {}
 
   selectMood(mood: string) {
+    console.log('Selected mood:', mood);
     this.selectedMood = mood;
     this.songService.getSongsByMood(mood).subscribe((data) => {
       this.songs = data;
