@@ -21,19 +21,53 @@ const _getToken = async () => {
     return data.access_token;
 }
 
+const searchGenreByPlaylist = async (token, genre) => {
+    const query = encodeURIComponent(genre); //encode the genre for URL 
+    const result = await fetch('https://api.spotify.com/v1/search?q=${query}&type=playlist&limit=1`', {
+        method: 'GET',
+        headers: {
+            'Authorization': 'Bearer ' + token,
+        },
+    });
+    const data = await result.json();
+    
+    if(!data.playlists || !data.playlists.items.length){
+        return null;
+    }
+    return data.playlists.items[0];
+}
+
+const searchTracks = async (token, playlistID) => {
+    const result = await fetch(`https://api.spotify.com/v1/playlists/${playlistID}/tracks?limit=5`, {  
+        method: 'GET',
+        headers: {
+            'Authorization': 'Bearer ' + token,
+        },
+    });
+    const data = await result.json();
+    const tracks = data.items.map(item => {
+        return {
+            name: item.track.name,
+            artist: item.track.artists.map(a => a.name).join(', '),
+            url: item.track.external_urls.spotify,
+            preview: item.track.preview_url,
+            image: item.track.album.images[0].url,
+        };
+    });
+    return tracks;
+};
+
+
 app.get( '/', (req, res) => {
     res.send("hello world from node.js server")
 });
 
-app.post('/api/recommend', (req, res) => {
+app.post('/api/recommend', async (req, res) => {
     const mood = req.body.mood;
     console.log(`Received mood: ${mood}`);
-    const recommendations = {
-        happy: ["Song 1", "Song 2", "Song 3"],
-        sad: ["Song 4", "Song 5", "Song 6"],
-        angry: ["Song 7", "Song 8", "Song 9"],
-    };
-    const songs = recommendations[mood] || [];
+    const token = await _getToken();
+    const playlist = await searchGenreByPlaylist(token, mood);
+    const songs = playlist ? await searchTracks(token, playlist.id) : recommendations[mood] || [];
     res.json({ songs });
 });
 
