@@ -1,6 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { Song } from './model/song.model'; // adjust path as needed
+
 
 @Injectable({ providedIn: 'root' })
 export class SongService {
@@ -9,9 +11,10 @@ export class SongService {
     
   }
 
-  getSongsByMood(mood: string): Observable<any[]> { //Observable is a type of data stream, any[] is the type of data we expect to receive
-    return this.http.post<any[]>('http://localhost:3000/api/recommend', { mood: mood}); //mood is the payload or information we want the server to use
+  getSongsByMood(mood: string): Observable<{ songs: Song[] }> {
+    return this.http.post<{ songs: Song[] }>('http://localhost:3000/api/recommend', { mood });
   }
+  
 }
 
 // for instance whatever the user clicks, mood: happy, we'll use that data

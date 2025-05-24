@@ -12,7 +12,7 @@ const _getToken = async () => {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
-            'Authorization': 'Basic' + btoa(clientId + ':' + clientSecret),
+            'Authorization': 'Basic ' + Buffer.from(clientId + ':' + clientSecret).toString('base64'),
         },
         body: 'grant_type=client_credentials',
     });
@@ -22,19 +22,33 @@ const _getToken = async () => {
 }
 
 const searchGenreByPlaylist = async (token, genre) => {
-    const query = encodeURIComponent(genre); //encode the genre for URL 
-    const result = await fetch('https://api.spotify.com/v1/search?q=${query}&type=playlist&limit=1`', {
+    const query = encodeURIComponent(genre); 
+    console.log(`Searching Spotify for playlists with query: ${query}`);
+    const result = await fetch(`https://api.spotify.com/v1/search?q=${query}&type=playlist&limit=10`
+        , {
         method: 'GET',
         headers: {
             'Authorization': 'Bearer ' + token,
         },
     });
     const data = await result.json();
-    
-    if(!data.playlists || !data.playlists.items.length){
+    console.log('Spotify API response:', JSON.stringify(data, null, 2));
+
+    if(!data.playlists || !data.playlists.items){
+        console.log('No playlists found');
         return null;
     }
-    return data.playlists.items[0];
+
+    const validPlaylists = data.playlists.items.filter(item => item!=null);
+
+    if(validPlaylists.length === 0){
+        console.log('No valid playlists found');
+        return null;
+    }
+
+    console.log(`Found ${validPlaylists.length} playlists`);
+    return validPlaylists[0]; // Return the first playlist
+
 }
 
 const searchTracks = async (token, playlistID) => {
@@ -63,12 +77,27 @@ app.get( '/', (req, res) => {
 });
 
 app.post('/api/recommend', async (req, res) => {
-    const mood = req.body.mood;
-    console.log(`Received mood: ${mood}`);
-    const token = await _getToken();
-    const playlist = await searchGenreByPlaylist(token, mood);
-    const songs = playlist ? await searchTracks(token, playlist.id) : recommendations[mood] || [];
-    res.json({ songs });
+    try {
+        const mood = req.body.mood;
+        console.log(`Received mood: ${mood}`);
+        
+        // Fetch Spotify token
+        const token = await _getToken();
+        console.log(`Token received: ${token}`);
+        
+        // Search for a playlist based on mood
+        const playlist = await searchGenreByPlaylist(token, mood);
+        console.log(`Playlist found: ${playlist ? playlist.name : 'None'}`);
+        
+        // Fetch tracks from the playlist
+        const songs = playlist ? await searchTracks(token, playlist.id) : [];
+        console.log(`Songs fetched: ${songs.length}`);
+        
+        res.json({ songs });
+    } catch (error) {
+        console.error('Error in /api/recommend:', error);
+        res.status(500).json({ error: 'Failed to fetch recommendations' });
+    }
 });
 
 app.listen( 3000, () => {

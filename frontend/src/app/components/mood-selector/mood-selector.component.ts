@@ -19,9 +19,12 @@ export class MoodSelectorComponent {
     this.songService.getSongsByMood(mood).subscribe({
       next: (data) => {
         console.log('Received songs:', data);
-        this.songs = data;
+        this.songs = data.songs.map(song => song.title);
       },
-    
+      error: (error) => {
+        console.error('Error fetching songs:', error);
+        alert('Failed to fetch songs. Please try again later.');
+      },
     });
   }
 }
