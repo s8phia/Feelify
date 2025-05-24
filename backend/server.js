@@ -24,7 +24,7 @@ const _getToken = async () => {
 const searchGenreByPlaylist = async (token, genre) => {
     const query = encodeURIComponent(genre); 
     console.log(`Searching Spotify for playlists with query: ${query}`);
-    const result = await fetch(`https://api.spotify.com/v1/search?q=${query}&type=playlist&limit=10`
+    const result = await fetch(`https://api.spotify.com/v1/search?q=${query}&type=playlist`
         , {
         method: 'GET',
         headers: {
@@ -32,7 +32,6 @@ const searchGenreByPlaylist = async (token, genre) => {
         },
     });
     const data = await result.json();
-    console.log('Spotify API response:', JSON.stringify(data, null, 2));
 
     if(!data.playlists || !data.playlists.items){
         console.log('No playlists found');
@@ -47,28 +46,42 @@ const searchGenreByPlaylist = async (token, genre) => {
     }
 
     console.log(`Found ${validPlaylists.length} playlists`);
-    return validPlaylists[0]; // Return the first playlist
+    return validPlaylists;
 
 }
 
-const searchTracks = async (token, playlistID) => {
-    const result = await fetch(`https://api.spotify.com/v1/playlists/${playlistID}/tracks?limit=5`, {  
-        method: 'GET',
-        headers: {
-            'Authorization': 'Bearer ' + token,
-        },
-    });
-    const data = await result.json();
-    const tracks = data.items.map(item => {
-        return {
-            name: item.track.name,
-            artist: item.track.artists.map(a => a.name).join(', '),
-            url: item.track.external_urls.spotify,
-            preview: item.track.preview_url,
-            image: item.track.album.images[0].url,
-        };
-    });
-    return tracks;
+
+const searchTracks = async (token, playlistIDs) => {
+    const allTracks = [];
+    for(const playlistID of playlistIDs) {
+        const result = await fetch(`https://api.spotify.com/v1/playlists/${playlistID}/tracks?`, {  
+            method: 'GET',           
+            headers: {
+                'Authorization': 'Bearer ' + token,
+            },
+        });
+        const data = await result.json();
+        if(data.items){
+            const tracks = data.items
+            .filter(item => item && item.track)
+            .map(item => {
+                return {
+                    name: item.track.name,
+                    artist: item.track.artists.map(a => a.name).join(', '),
+                    url: item.track.external_urls.spotify,
+                    preview: item.track.preview_url,
+                    image: item.track.album.images[0]?.url || null,
+                };
+            });
+            allTracks.push(...tracks);
+        } else {
+            console.log('No tracks found in playlist');
+        }
+    }
+    console.log(`Fetched ${allTracks.length} tracks from playlists`);
+    //get five random songs friom allTracks
+    return allTracks.sort(() => Math.random() - Math.random()).slice(0, 5);
+
 };
 
 
@@ -89,8 +102,12 @@ app.post('/api/recommend', async (req, res) => {
         const playlist = await searchGenreByPlaylist(token, mood);
         console.log(`Playlist found: ${playlist ? playlist.name : 'None'}`);
         
-        // Fetch tracks from the playlist
-        const songs = playlist ? await searchTracks(token, playlist.id) : [];
+        // fetch plauylist ids
+        const playlistIDs = playlist.map(item => item.id);
+        console.log(`Playlist IDs: ${playlistIDs.join(', ')}`);
+
+        // Search for tracks in the playlist
+        const songs = await searchTracks(token, playlistIDs);
         console.log(`Songs fetched: ${songs.length}`);
         
         res.json({ songs });
