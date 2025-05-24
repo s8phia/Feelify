@@ -1,15 +1,18 @@
 import { Component, Inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { SongService } from '../../song.service'; 
+import { Song } from '../../model/song.model'; 
+
 @Component({
   selector: 'app-mood-selector',
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './mood-selector.component.html',
   styleUrl: './mood-selector.component.scss'
 })
 export class MoodSelectorComponent {
   moods = ['happy', 'sad', 'angry', 'chill', 'excited', 'romantic'];
   selectedMood: string = '';
-  songs: string[] = [];
+  songs: Song[] = [];
 
   constructor(private songService: SongService) {}
 
@@ -19,7 +22,7 @@ export class MoodSelectorComponent {
     this.songService.getSongsByMood(mood).subscribe({
       next: (data) => {
         console.log('Received songs:', data);
-        this.songs = data.songs.map(song => song.title);
+        this.songs = data.songs;
       },
       error: (error) => {
         console.error('Error fetching songs:', error);

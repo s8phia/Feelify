@@ -1,9 +1,7 @@
 export interface Song {
-    id: number;
-    title: string;
+    name: string;
     artist: string;
-    album: string;
-    genre: string;
-    mood: string;
-    coverImageUrl?: string;
+    url: string;
+    preview?: string | null;
+    image?: string | null;
 } 
