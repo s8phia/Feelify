@@ -3,9 +3,10 @@ const cors = require('cors');
 const app   = express();
 app.use(cors());
 app.use(express.json());
+require('dotenv').config();
 
-const clientId = '93f0a39ae4d34f7a80fcc3cde2227940';
-const clientSecret = '1c260af380ec4980b57a6fe54b4c815b';
+const clientId = process.env.clientID ;
+const clientSecret = process.env.clientSecretID;
 
 const _getToken = async () => {
     const result = await fetch('https://accounts.spotify.com/api/token', {
