@@ -1,17 +1,30 @@
-<div class="p-4">
-    <label class="text-black text-lg font-bold mb-2 block">
-      Hey, how are you feeling today?
-    </label>
-  
-    <div class="flex gap-2 flex-wrap mb-4">
-      @for (mood of moods; track mood) {
-        <button
-          (click)="selectMood(mood)"
-          class="px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600 transition"
-        >
-          {{ mood }}
-        </button>
-      }
-    </div>
+<div class="flex flex-col items-center gap-4">
+  <form 
+    class="flex justify-center gap-3"
+    (submit)="selectMood(moodInput.value); $event.preventDefault()"
+  >
+    <input 
+      class="border border-gray-300 rounded px-3 py-2 w-64"
+      type="text"
+      #moodInput
+      placeholder="How are you feeling?"
+    />
+    <button
+      type="submit"
+      class="px-4 py-2 rounded bg-green-500 text-white hover:bg-green-600 transition"
+    >
+      Get Song
+    </button>
+  </form>
+
+  <div class="flex gap-2 flex-wrap justify-center">
+    @for (mood of moods; track mood) {
+      <button
+        (click)="selectMood(mood)"
+        class="px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600 transition"
+      >
+        {{ mood }}
+      </button>
+    }
   </div>
-  
+</div>
