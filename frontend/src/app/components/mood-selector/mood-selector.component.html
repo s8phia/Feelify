@@ -28,5 +28,41 @@
     }
   </div>
 
+  @if (songs.length > 0) {
+    <div class="mt-8">
+      <h2>@if(selectedMood){
+        Tunes for when you're feeling {{ selectedMood }}
+        }
+      </h2>
+      <div>
+        @for(song of songs; track song.url){
+          <div>
+            <img
+              [src] = "song.image"
+              [alt] = "song.name"
+            />
+          </div>
+          <div>
+            <h3>{{song.name}}</h3>
+            <p>{{song.artist}}</p>
+            <a
+              [href]="song.url"
+              target="_blank"
+              class="text-blue-500 hover:underline"
+            > Open in Spotify
+            </a>
+          </div>
+        }
+      </div>
+    </div>
+  } 
+  
+  @if(isLoading){
+    <div class="mt-4 text-gray-500">
+      <h1>Loading...</h1>
+    </div>
+  }
+
+
   
 </div>
