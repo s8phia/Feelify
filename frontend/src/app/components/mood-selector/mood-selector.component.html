@@ -27,13 +27,18 @@
       </button>
     }
   </div>
-
-  @if (songs.length > 0) {
+  @if (isLoading) {
+    <div class="mt-8 text-lg text-gray-600">
+      Loading...
+    </div>
+  }
+  @if (!isLoading && songs.length > 0) {
     <div class="mt-8">
       <h2>@if(selectedMood){
         Tunes for when you're feeling {{ selectedMood }}
         }
       </h2>
+    
       <div>
         @for(song of songs; track song.url){
           <div>
@@ -56,13 +61,6 @@
       </div>
     </div>
   } 
-  
-  @if(isLoading){
-    <div class="mt-4 text-gray-500">
-      <h1>Loading...</h1>
-    </div>
-  }
-
 
   
 </div>

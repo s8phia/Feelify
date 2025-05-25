@@ -22,14 +22,17 @@ export class MoodSelectorComponent {
     console.log('Selected mood:', mood);
     this.selectedMood = mood;
     this.isLoading = true;
+    this.songs =[];
     this.songService.getSongsByMood(mood).subscribe({
       next: (data) => {
         console.log('Received songs:', data);
         this.songs = data.songs;
         this.isLoading = false;
+        
       },
       error: (error) => {
         console.error('Error fetching songs:', error);
+        this.isLoading = false;
         alert('Failed to fetch songs. Please try again later.');
       },
     });
