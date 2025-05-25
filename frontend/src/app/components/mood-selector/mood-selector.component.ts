@@ -33,7 +33,7 @@ export class MoodSelectorComponent {
       error: (error) => {
         console.error('Error fetching songs:', error);
         this.isLoading = false;
-        alert('Failed to fetch songs. Please try again later.');
+        alert('Failed to fetch songs.');
       },
     });
   }
